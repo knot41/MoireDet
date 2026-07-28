@@ -133,7 +133,7 @@ class TripleBranchWithSpecificConv(nn.Module):
             nn.BatchNorm2d(ouput_channel)
         )
 
-        self.attention_backbone = backbone_model(pretrained=True)
+        self.attention_backbone = backbone_model(pretrained=pretrained)
         self.attention_head = FPEM_FFM(backbone_out, fpem_repeat=fpem_repeat,
                                        channels=channels, ouput_channel=1)
 
