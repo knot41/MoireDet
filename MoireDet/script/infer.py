@@ -116,10 +116,9 @@ def build_model(checkpoint: dict) -> torch.nn.Module:
     return model
 
 
-def preprocess(path: Path, size: int, color_order: str) -> torch.Tensor:
-    image = cv2.imread(str(path), cv2.IMREAD_COLOR)
-    if image is None:
-        raise ValueError(f'OpenCV could not read the input image: {path}')
+def preprocess_image(image: np.ndarray, size: int, color_order: str) -> torch.Tensor:
+    if image is None or image.ndim != 3 or image.shape[2] != 3:
+        raise ValueError('Expected a non-empty BGR image with three channels.')
     image = cv2.resize(image, (size, size), interpolation=cv2.INTER_LINEAR)
     if color_order == 'rgb':
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -127,6 +126,13 @@ def preprocess(path: Path, size: int, color_order: str) -> torch.Tensor:
     image = (image - IMAGENET_MEAN) / IMAGENET_STD
     tensor = torch.from_numpy(image.transpose(2, 0, 1).copy()).unsqueeze(0)
     return tensor
+
+
+def preprocess(path: Path, size: int, color_order: str) -> torch.Tensor:
+    image = cv2.imread(str(path), cv2.IMREAD_COLOR)
+    if image is None:
+        raise ValueError(f'OpenCV could not read the input image: {path}')
+    return preprocess_image(image, size, color_order)
 
 
 def save_comparison(
